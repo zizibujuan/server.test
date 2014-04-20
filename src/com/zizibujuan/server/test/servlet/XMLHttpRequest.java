@@ -32,6 +32,10 @@ public class XMLHttpRequest {
 		this.serverLocation = serverLocation;
 	}
 
+	public void post(String urlString){
+		post(urlString, null);
+	}
+	
 	public void post(String urlString, Map<String, Object> formData){
 		
 		HttpURLConnection connection = null;
@@ -44,8 +48,12 @@ public class XMLHttpRequest {
 
 			connection.setDoOutput(true);
 
-			OutputStream out = new BufferedOutputStream(connection.getOutputStream());
-			out.write(prepareParams(formData).getBytes());
+			if(formData != null && !formData.isEmpty()){
+				OutputStream out = new BufferedOutputStream(connection.getOutputStream());
+				out.write(prepareParams(formData).getBytes());
+				out.flush();
+				out.close();
+			}
 
 			responseCode = connection.getResponseCode();
 			if(400/*client error*/ <= responseCode && responseCode <= 600/*500 server error*/){
@@ -65,19 +73,7 @@ public class XMLHttpRequest {
 	}
 	
 	private String prepareParams(Map<String, Object> params){
-        StringBuilder sbUrl = new StringBuilder();
-        if(params != null && !params.isEmpty()){
-            sbUrl.append("?");
-            int count = 0;
-            for(Map.Entry<String, Object> entry : params.entrySet()){
-                if(count != 0){
-                    sbUrl.append("&");
-                }
-                sbUrl.append(entry.getKey()).append("=").append(entry.getValue());
-                count++;
-            }
-        }
-        return sbUrl.toString();
+        return JsonUtil.toJson(params);
     }
 
 	public int getResponseCode() {
