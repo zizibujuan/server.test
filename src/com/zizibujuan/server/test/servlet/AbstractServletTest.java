@@ -96,6 +96,8 @@ public class AbstractServletTest {
 		DatabaseUtil.update(dataSource, "DELETE FROM DRIP_USER_INFO  WHERE DBID=?", userId);
 		// 删除自我关注信息,如果存在的话
 		DatabaseUtil.update(dataSource, "DELETE FROM DRIP_USER_RELATION WHERE USER_ID=? AND WATCH_USER_ID=?", userId, userId);
+		// 删除用户统计信息
+		DatabaseUtil.update(dataSource, "DELETE FROM DRIP_USER_STATISTICS WHERE USER_ID=?", userId);
 	}
 	
 	private void activeUser(Long userId){
