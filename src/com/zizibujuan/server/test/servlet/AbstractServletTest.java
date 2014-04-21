@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
@@ -43,7 +44,10 @@ public class AbstractServletTest {
 	@Before
 	public void setUp(){
 		formData = new HashMap<String, Object>();
-		
+	}
+	
+	@After
+	public void tearDown(){
 		
 	}
 	

@@ -83,4 +83,8 @@ public class XMLHttpRequest {
 	public Map<String, Object> getContentAsJsonObject() {
 		return JsonUtil.fromJsonObject(returnContent);
 	}
+
+	public <T> T getContentAsJsonObject(Class<T> classOfT) {
+		return JsonUtil.fromJsonObject(returnContent, classOfT);
+	}
 }
