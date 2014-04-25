@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
@@ -50,13 +51,13 @@ public class XMLHttpRequest {
 
 			if(formData != null && !formData.isEmpty()){
 				OutputStream out = new BufferedOutputStream(connection.getOutputStream());
-				out.write(prepareParams(formData).getBytes());
+				out.write(preparePostParams(formData).getBytes());
 				out.flush();
 				out.close();
 			}
 
 			responseCode = connection.getResponseCode();
-			if(400/*client error*/ <= responseCode && responseCode <= 600/*500 server error*/){
+			if(isErrorResponse()){
 				InputStream in = connection.getErrorStream();
 			    returnContent = IOUtils.toString(in);
 			}else{
@@ -71,9 +72,56 @@ public class XMLHttpRequest {
 			}
 		}
 	}
+
+	public void get(String urlString, Map<String, Object> params){
+        HttpURLConnection connection = null;
+        try {
+            URL url = new URL(prepareQueryParams(serverLocation + urlString, params));
+            connection = (HttpURLConnection)url.openConnection();
+            connection.setRequestProperty(XHR_HEADER_KEY, XHR_HEADER_VALUE);
+
+            responseCode = connection.getResponseCode();
+            if(isErrorResponse()){
+                InputStream inputStream = new BufferedInputStream(connection.getInputStream());
+                returnContent = IOUtils.toString(inputStream);
+
+            }else{
+            	InputStream in = new BufferedInputStream(connection.getInputStream());
+			    returnContent = IOUtils.toString(in);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(connection != null){
+                connection.disconnect();
+            }
+        }
+	}
 	
-	private String prepareParams(Map<String, Object> params){
+	private boolean isErrorResponse() {
+		return 400/*client error*/ <= responseCode && responseCode <= 600/*500 server error*/;
+	}
+	
+	private String preparePostParams(Map<String, Object> params){
         return JsonUtil.toJson(params);
+    }
+	
+	private String prepareQueryParams(String urlString, Map<String, Object> params){
+        StringBuilder sbUrl = new StringBuilder(urlString);
+        if(params != null){
+            if(params != null && !params.isEmpty()){
+                sbUrl.append("?");
+                int count = 0;
+                for(Map.Entry<String, Object> entry : params.entrySet()){
+                    if(count != 0){
+                        sbUrl.append("&");
+                    }
+                    sbUrl.append(entry.getKey()).append("=").append(entry.getValue());
+                    count++;
+                }
+            }
+        }
+        return sbUrl.toString();
     }
 
 	public int getResponseCode() {
@@ -83,8 +131,12 @@ public class XMLHttpRequest {
 	public Map<String, Object> getContentAsJsonObject() {
 		return JsonUtil.fromJsonObject(returnContent);
 	}
-
+	
 	public <T> T getContentAsJsonObject(Class<T> classOfT) {
 		return JsonUtil.fromJsonObject(returnContent, classOfT);
+	}
+	
+	public List<Map<String, Object>> getContentAsJsonArray(){
+		return JsonUtil.fromJsonArray(returnContent);
 	}
 }
