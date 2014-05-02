@@ -73,6 +73,10 @@ public class XMLHttpRequest {
 		}
 	}
 
+	public void get(String urlString){
+		this.get(urlString, null);
+	}
+	
 	public void get(String urlString, Map<String, Object> params){
         HttpURLConnection connection = null;
         try {
