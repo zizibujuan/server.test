@@ -102,6 +102,49 @@ public class XMLHttpRequest {
         }
 	}
 	
+	public void put(String urlString){
+		put(urlString, null);
+	}
+	
+	public void put(String urlString, Map<String, Object> formData){
+		
+		HttpURLConnection connection = null;
+		
+		try {
+			URL url = new URL(serverLocation + urlString);
+			
+			connection = (HttpURLConnection)url.openConnection();
+			connection.setRequestProperty(XHR_HEADER_KEY, XHR_HEADER_VALUE);
+
+			connection.setDoOutput(true);
+			connection.setRequestMethod("PUT");
+			
+			
+
+			if(formData != null && !formData.isEmpty()){
+				OutputStream out = new BufferedOutputStream(connection.getOutputStream());
+				out.write(preparePostParams(formData).getBytes());
+				out.flush();
+				out.close();
+			}
+
+			responseCode = connection.getResponseCode();
+			if(isErrorResponse()){
+				InputStream in = connection.getErrorStream();
+			    returnContent = IOUtils.toString(in);
+			}else{
+				InputStream in = new BufferedInputStream(connection.getInputStream());
+			    returnContent = IOUtils.toString(in);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally{
+			if(connection != null){
+				connection.disconnect();
+			}
+		}
+	}
+	
 	private boolean isErrorResponse() {
 		return 400/*client error*/ <= responseCode && responseCode <= 600/*500 server error*/;
 	}
