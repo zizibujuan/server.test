@@ -45,6 +45,25 @@ public class AuthorizedUserServlet extends DatabaseSupportServletTest{
 		xhr.post("logout");
 	}
 	
+	/**
+	 * 创建用户，并使用该用户登录
+	 * 
+	 * @param email 邮箱地址
+	 * @param password 密码
+	 * @param loginName 登录用户
+	 * @return 用户标识
+	 */
+	protected Long loginUser(String email, String password, String loginName){
+		Long userId = createUser(email, password, loginName);
+		activeUser(userId);
+		return userId;
+	}
+	
+	protected void logoutUser(Long userId){
+		removeUser(userId);
+		xhr.post("logout");
+	}
+	
 	private Long createUser(String email, String password, String loginName){
 		Map<String, Object> params = new HashMap<>();
 		params.put("email", email);
