@@ -49,6 +49,7 @@ public class XMLHttpRequest {
 
 			connection.setDoOutput(true);
 
+			// FIXME: 下面这种写法，如果formData为null，则不会进入对应的servlet
 			if(formData != null && !formData.isEmpty()){
 				OutputStream out = new BufferedOutputStream(connection.getOutputStream());
 				out.write(preparePostParams(formData).getBytes());

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.zizibujuan.drip.server.util.dao.DatabaseUtil;
+import com.zizibujuan.useradmin.server.model.UserInfo;
 import com.zizibujuan.useradmin.server.service.UserService;
 import com.zizibujuan.useradmin.server.servlets.UserAdminServiceHolder;
 
@@ -32,7 +33,7 @@ public class AuthorizedUserServlet extends DatabaseSupportServletTest{
 	 * @return
 	 */
 	protected void loginTestUser(){
-		testUserId = createUser(testUserEmail, testUserPassword, testUserLoginName);
+		testUserId = createAndLoginUser(testUserEmail, testUserPassword, testUserLoginName);
 		activeUser(testUserId);
 	}
 	
@@ -54,7 +55,7 @@ public class AuthorizedUserServlet extends DatabaseSupportServletTest{
 	 * @return 用户标识
 	 */
 	protected Long loginUser(String email, String password, String loginName){
-		Long userId = createUser(email, password, loginName);
+		Long userId = createAndLoginUser(email, password, loginName);
 		activeUser(userId);
 		return userId;
 	}
@@ -64,7 +65,7 @@ public class AuthorizedUserServlet extends DatabaseSupportServletTest{
 		xhr.post("logout");
 	}
 	
-	private Long createUser(String email, String password, String loginName){
+	private Long createAndLoginUser(String email, String password, String loginName){
 		Map<String, Object> params = new HashMap<>();
 		params.put("email", email);
 		params.put("password", password);
@@ -74,7 +75,17 @@ public class AuthorizedUserServlet extends DatabaseSupportServletTest{
 		return DatabaseUtil.queryForLong(dataSource, "SELECT DBID FROM DRIP_USER_INFO WHERE EMAIL=?", email);
 	}
 	
-	private void removeUser(Long userId){
+	protected Long createUser(String email, String password, String loginName){
+		UserInfo userInfo = new UserInfo();
+		userInfo.setEmail(email);
+		userInfo.setPassword(password);
+		userInfo.setLoginName(loginName);
+		Long userId = userService.register(userInfo);
+		activeUser(userId);
+		return userId;
+	}
+	
+	protected void removeUser(Long userId){
 		// 删除用户
 		DatabaseUtil.update(dataSource, "DELETE FROM DRIP_USER_ATTRIBUTES WHERE USER_ID=?", userId);
 		DatabaseUtil.update(dataSource, "DELETE FROM DRIP_USER_INFO  WHERE DBID=?", userId);
