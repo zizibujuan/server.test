@@ -187,4 +187,8 @@ public class XMLHttpRequest {
 	public List<Map<String, Object>> getContentAsJsonArray(){
 		return JsonUtil.fromJsonArray(returnContent);
 	}
+	
+	public <T> List<T> getContentAsJsonArray(Class<T> classOfT){
+		return JsonUtil.fromJsonArray(returnContent, List.class, classOfT);
+	}
 }
